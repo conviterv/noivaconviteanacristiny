@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Casamento de Ronaldo & Vitória</title>
+    
+    <!-- Fontes Elegantes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Great+Vibes&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-light: #F3E5AB;
+            --dark-overlay: rgba(0, 0, 0, 0.65);
+            --text-white: #ffffff;
+            --font-title: 'Great Vibes', cursive;
+            --font-serif: 'Cinzel', serif;
+            --font-body: 'Montserrat', sans-serif;
+            --transition-speed: 0.8s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            color: var(--text-white);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            overflow-y: hidden; /* Controlado via JS/CSS */
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* --- ENVELOPE ANIMATION LAYER --- */
+        #envelope-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #2c2c2c;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 1.5s cubic-bezier(0.77, 0, 0.175, 1), opacity 1s ease;
+            perspective: 1000px;
+        }
+
+        .envelope-wrapper {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.5s;
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0; 
+            height: 0; 
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-top: 110px solid #dcdcdc; /* Cor da aba */
+            transform-origin: top;
+            transition: transform 0.8s ease-in-out, z-index 0.8s;
+            z-index: 3;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+        }
+
+        .envelope-body {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-left: 150px solid #cfcfcf;
+            border-right: 150px solid #cfcfcf;
+            border-bottom: 100px solid #bfbfbf;
+            border-top: 100px solid transparent;
+            z-index: 2;
+            border-radius: 0 0 5px 5px;
+        }
+
+        .wax-seal {
+            position: absolute;
+            top: 30px; /* Ajustado para ficar na aba */
+            z-index: 4;
+            width: 50px;
+            height: 50px;
+            background: #8b0000;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.4), inset 0 0 10px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--gold);
+            font-size: 24px;
+            font-family: var(--font-title);
+            border: 2px solid rgba(255,255,255,0.1);
+            transition: transform 0.3s;
+        }
+
+        .wax-seal:after {
+            content: 'R&V';
+            font-size: 16px;
+        }
+
+        .envelope-wrapper:hover .wax-seal {
+            transform: scale(1.1);
+        }
+
+        .tap-instruction {
+            position: absolute;
+            bottom: -50px;
+            color: #fff;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            animation: pulse 2s infinite;
+        }
+
+        /* Animação de abrir */
+        body.opened #envelope-layer {
+            transform: translateY(100vh);
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        body.opened .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 0;
+        }
+
+        /* --- MAIN CONTENT (SCROLL SNAP) --- */
+        #main-content {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            opacity: 0;
+            transition: opacity 1s ease 1s; /* Delay para aparecer depois do envelope */
+        }
+
+        body.opened #main-content {
+            opacity: 1;
+        }
+
+        section {
+            height: 100vh;
+            width: 100%;
+            scroll-snap-align: start;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* Overlay para legibilidade */
+        section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-overlay);
+            z-index: 1;
+        }
+
+        .content-box {
+            position: relative;
+            z-index: 2;
+            max-width: 600px;
+            width: 100%;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 40px 20px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(3px);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            animation: fadeInUp 1s ease-out;
+        }
+
+        /* Tipografia */
+        h1, h2, h3 {
+            color: var(--gold);
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            font-family: var(--font-title);
+            font-size: 3.5rem;
+            line-height: 1.2;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px solid var(--gold);
+            display: inline-block;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            color: #f0f0f0;
+        }
+
+        .verse {
+            font-style: italic;
+            font-family: var(--font-serif);
+            font-size: 0.95rem;
+            color: var(--gold-light);
+            margin-top: 20px;
+        }
+
+        .highlight-name {
+            font-family: var(--font-title);
+            font-size: 2rem;
+            color: var(--gold);
+            display: block;
+            margin: 10px 0;
+        }
+
+        .parents-block {
+            margin: 20px 0;
+            font-size: 0.9rem;
+        }
+
+        .guest-box {
+            border: 1px solid var(--gold);
+            padding: 15px;
+            margin: 20px 0;
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        /* Botão */
+        .btn-accept {
+            display: inline-block;
+            background: linear-gradient(45deg, #b8860b, #D4AF37);
+            color: #000;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn-accept:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+            color: var(--gold);
+            animation: bounce 2s infinite;
+            font-size: 1.5rem;
+            opacity: 0.8;
+            cursor: pointer;
+        }
+
+        /* Keyframes */
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateX(-50%) translateY(0);} 40% {transform: translateX(-50%) translateY(-10px);} 60% {transform: translateX(-50%) translateY(-5px);} }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Mobile Adjustments */
+        @media (max-width: 400px) {
+            h1 { font-size: 2.8rem; }
+            h2 { font-size: 1.2rem; }
+            .content-box { padding: 30px 15px; width: 90%; }
+            p { font-size: 0.95rem; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- ENVELOPE DE ABERTURA -->
+    <div id="envelope-layer" onclick="openEnvelope()">
+        <div class="envelope-wrapper">
+            <div class="envelope-flap"></div>
+            <div class="envelope-body"></div>
+            <div class="wax-seal"></div>
+        </div>
+        <div class="tap-instruction">Toque no selo para abrir</div>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main id="main-content">
+
+        <!-- PÁGINA 1: ANÚNCIO -->
+        <section id="page1" style="background-image: url('https://photos.fife.usercontent.google.com/pw/AP1GczMnAXq_93Di-Mv_GVebUXRJHAJ6SsRNSzDLKeiezWeY0RzJ41Ar0vICFQ=w420-h237-no?authuser=0');">
+            <div class="content-box">
+                <p style="text-transform: uppercase; letter-spacing: 3px; font-size: 0.8rem;">Vamos nos casar</p>
+                <h1>Ronaldo & Vitória</h1>
+                <div style="width: 50px; height: 2px; background: var(--gold); margin: 20px auto;"></div>
+                <p class="verse">
+                    "As muitas águas não podem apagar este amor, nem os rios afogá-lo."<br>
+                    <strong>Cânticos 8:7</strong>
+                </p>
+            </div>
+            <div class="scroll-indicator" onclick="scrollToNext('page2')">
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </section>
+
+        <!-- PÁGINA 2: OS NOIVOS E PAIS -->
+        <section id="page2" style="background-image: url('https://photos.fife.usercontent.google.com/pw/AP1GczMfqPAYou8zT240cTdBOVKFmfmNAMfBqaSR_bkUxAtOcEuowDYB7au_sw=w236-h183-s-no-gm?authuser=0');">
+            <div class="content-box">
+                <h2>A Bênção das Famílias</h2>
+                
+                <p>Com a honra e a alegria de anunciar que nossos filhos se unirão em santo matrimônio.</p>
+
+                <div class="parents-block">
+                    <p style="color: var(--gold); font-weight: bold; margin-bottom: 5px;">Pais do Noivo</p>
+                    <p>Natividade Pereira de Araújo<br>& Maria Barros de Araújo</p>
+                </div>
+
+                <div class="parents-block">
+                    <p style="color: var(--gold); font-weight: bold; margin-bottom: 5px;">Pais da Noiva</p>
+                    <p>Reilson Barbosa Santos<br>& Vânia Nunes de Araújo Pereira</p>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <span class="highlight-name" style="font-size: 1.5rem;">Ronaldo Barros</span>
+                    <span style="font-family: var(--font-title); color: #fff;">&</span>
+                    <span class="highlight-name" style="font-size: 1.5rem;">Vitória Barbosa</span>
+                </div>
+            </div>
+            <div class="scroll-indicator" onclick="scrollToNext('page3')">
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </section>
+
+        <!-- PÁGINA 3: CONVITE OFICIAL -->
+        <section id="page3" style="background-image: url('https://photos.fife.usercontent.google.com/pw/AP1GczPuSPEPgpmH6aCrlcJW-3ULrNhQPgQNEjoKKf0Tq8AAu5crepJVIkhOPA=w558-h358-s-no-gm?authuser=0');">
+            <div class="content-box">
+                <h2>Convite Especial</h2>
+                <p>É com corações transbordando de gratidão a Deus que nós, juntamente com nossos pais, temos a honra de convidar</p>
+                
+                <div class="guest-box">
+                    <span id="guest-name" class="highlight-name">Ana Cristiny e Família</span>
+                </div>
+
+                <p>para testemunhar o início da nossa nova vida juntos. Sua presença tornará este dia ainda mais inesquecível para nós.</p>
+            </div>
+            <div class="scroll-indicator" onclick="scrollToNext('page4')">
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </section>
+
+        <!-- PÁGINA 4: ACEITE E WHATSAPP -->
+        <section id="page4" style="background-image: url('https://photos.fife.usercontent.google.com/pw/AP1GczNw2liRFzpTJiqUdQuVajFCO4xlInBqYIvxlmifE47blRYez4L4laFHIw=w528-h580-s-no-gm?authuser=0');">
+            <div class="content-box">
+                <h2>Aceite do Convite</h2>
+                
+                <p>Estamos preparando cada detalhe com muito amor.</p>
+                
+                <a href="#" id="whatsapp-link" class="btn-accept" target="_blank">
+                    <i class="fab fa-whatsapp"></i> Aceitar Convite
+                </a>
+
+                <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px;">
+                    <p style="font-size: 0.85rem; color: #ccc;">
+                        <i class="fas fa-info-circle" style="color: var(--gold);"></i> Importante:<br>
+                        Após o seu "Aceite", enviaremos em breve o <strong>Manual dos Convidados</strong> contendo a lista de presentes, local, horário e informações da cerimônia para a confirmação oficial da presença.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Lógica de Abertura do Envelope
+        function openEnvelope() {
+            document.body.classList.add('opened');
+            // Tocar música opcionalmente aqui se desejar
+        }
+
+        // Lógica de Scroll Suave
+        function scrollToNext(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Lógica para pegar o nome do convidado da URL
+        // Exemplo de uso: seudominio.github.io/?nome=Tio João e Família
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const guestName = urlParams.get('nome');
+            
+            if (guestName) {
+                document.getElementById('guest-name').innerText = guestName;
+            }
+
+            // Configuração da Mensagem do WhatsApp
+            const message = "Queridos Noivos,%0A%0ARecebemos com grande alegria e honra o convite para testemunhar esta nova aliança firmada em Deus. Agradecemos a consideração e a oportunidade de nos alegrarmos convosco. Já estamos ansiosos pelos detalhes!";
+            
+            // Link genérico que abre o app para escolher o contato
+            // Em mobile, 'wa.me/?text=' abre o seletor de contatos.
+            const waLink = `https://wa.me/?text=${message}`;
+            
+            document.getElementById('whatsapp-link').href = waLink;
+        });
+    </script>
+</body>
+</html>
